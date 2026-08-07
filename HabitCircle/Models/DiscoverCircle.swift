@@ -73,6 +73,20 @@ struct DiscoverCircle: Identifiable, Equatable {
             description: "Too much doom scrolling. Let's keep each other accountable with no phone time.",
             iconAsset: "CircleRoutine"
         ),
+        DiscoverCircle(
+            title: "Daily Gratitude Journal",
+            duration: "1 month",
+            memberCount: 18,
+            description: "Write three things you're grateful for each night. Small notes, big mindset shift.",
+            iconAsset: "CircleMisc"
+        ),
+        DiscoverCircle(
+            title: "5-Minute Meditation",
+            duration: "8 weeks",
+            memberCount: 34,
+            description: "A short daily reset before the chaos starts. Breathe together, stay consistent.",
+            iconAsset: "CircleMisc"
+        ),
     ]
 }
 

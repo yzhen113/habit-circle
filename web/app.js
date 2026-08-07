@@ -233,6 +233,12 @@ const CIRCLES = [
   { title: "Screen Time Under 4 Hours", duration: "6 months", members: 82, category: "routine",
     icon: "assets/circle-routine.png",
     desc: "Too much doom scrolling. Let's keep each other accountable with no phone time.", liked: false },
+  { title: "Daily Gratitude Journal", duration: "1 month", members: 18, category: "misc",
+    icon: "assets/circle-misc.png",
+    desc: "Write three things you're grateful for each night. Small notes, big mindset shift.", liked: false },
+  { title: "5-Minute Meditation", duration: "8 weeks", members: 34, category: "misc",
+    icon: "assets/circle-misc.png",
+    desc: "A short daily reset before the chaos starts. Breathe together, stay consistent.", liked: false },
 ];
 const CATEGORIES = [
   { id: "physical", title: "Physical Health" },
