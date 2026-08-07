@@ -683,7 +683,8 @@ function filteredCircles() {
   return CIRCLES.filter((c) => {
     if (selectedCategoryID && c.category !== selectedCategoryID) return false;
     if (!q) return true;
-    return c.title.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+    // Discover search matches habit / circle title only.
+    return c.title.toLowerCase().includes(q);
   });
 }
 
@@ -773,7 +774,21 @@ function renderCircleList() {
   const list = $("#circleList");
   if (!list) return;
   list.innerHTML = "";
-  filteredCircles().forEach((c) => appendCircleCard(list, c, { from: "discover" }));
+  const circles = filteredCircles();
+  if (!circles.length) {
+    const q = discoverSearch.trim();
+    list.innerHTML =
+      `<div class="discover-empty">` +
+        `<div class="discover-empty-title">${q ? "No matching circles" : "No circles"}</div>` +
+        `<p class="discover-empty-sub">${
+          q
+            ? `Nothing titled “${escapeHTML(q)}”. Try another name.`
+            : "Try clearing the category filter."
+        }</p>` +
+      `</div>`;
+    return;
+  }
+  circles.forEach((c) => appendCircleCard(list, c, { from: "discover" }));
 }
 
 function renderSavedList() {

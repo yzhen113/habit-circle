@@ -513,6 +513,13 @@ input, textarea {
   padding: 0 var(--h-pad) var(--scroll-bottom);
   display: flex; flex-direction: column; gap: 10px;
 }
+.discover-empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 8px; padding: 48px 16px;
+  color: var(--dark-gray);
+}
+.discover-empty-title { font-size: 17px; font-weight: 600; color: var(--black); }
+.discover-empty-sub { font-size: 14px; line-height: 20px; max-width: 260px; margin: 0; }
 
 /* DiscoverCircleCard — VStack(spacing: 14), padding 22, radius 15 */
 .circle-card {
