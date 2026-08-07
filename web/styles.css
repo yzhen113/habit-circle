@@ -204,8 +204,7 @@ input, textarea {
 
 .home-header {
   display: flex; align-items: center; justify-content: space-between;
-  /* Left matches Discover title (h-pad); right keeps the heart on the tab-bar inset. */
-  padding: var(--header-v-pad) var(--tabbar-h-pad) var(--header-v-pad) var(--h-pad);
+  padding: var(--header-v-pad) var(--tabbar-h-pad);
   flex: 0 0 auto;
 }
 .header-icon {
@@ -461,7 +460,8 @@ input, textarea {
   z-index: 2;
 }
 .discover-title {
-  margin: 0; padding: 8px var(--h-pad) 0;
+  /* Match Home date title inset (tabBarHorizontalPadding). */
+  margin: 0; padding: 8px var(--tabbar-h-pad) 0;
   font-size: 36px; font-weight: 600; line-height: 41px;
   color: var(--black);
 }
