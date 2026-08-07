@@ -683,6 +683,13 @@ function filteredCircles() {
   });
 }
 
+function clearCategoryFilter() {
+  if (!selectedCategoryID) return;
+  selectedCategoryID = null;
+  renderChips();
+  renderCircleList();
+}
+
 function renderChips() {
   const chips = $("#chipRow");
   chips.innerHTML = "";
@@ -760,6 +767,11 @@ function renderDiscover() {
   $("#discoverSearch").addEventListener("input", (e) => {
     discoverSearch = e.target.value;
     renderCircleList();
+  });
+  // Tap empty space around the filters (not on a pill or card) to clear the active filter.
+  $("#discoverScroll").addEventListener("click", (e) => {
+    if (e.target.closest(".chip, .circle-card, button, a, input")) return;
+    clearCategoryFilter();
   });
 }
 
