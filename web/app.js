@@ -270,6 +270,10 @@ function showScreen(name) {
   } else if (name === "discover") {
     const sc = $("#discoverScroll");
     if (sc) sc.scrollTop = 0;
+  } else if (name === "saved") {
+    renderSavedList();
+    const sc = $("#savedScroll");
+    if (sc) sc.scrollTop = 0;
   }
 }
 
@@ -690,6 +694,59 @@ function clearCategoryFilter() {
   renderCircleList();
 }
 
+function likedCircles() {
+  return CIRCLES.filter((c) => c.liked);
+}
+
+/// Home heart fill — pink when at least one Discover circle is saved.
+function updateHomeHeart() {
+  const btn = $("#homeHeart");
+  if (!btn) return;
+  const any = likedCircles().length > 0;
+  btn.classList.toggle("has-saved", any);
+  btn.innerHTML = any ? ICONS["heart-fill"] : ICONS.heart;
+}
+
+function toggleCircleLike(c) {
+  c.liked = !c.liked;
+  renderCircleList();
+  renderSavedList();
+  updateHomeHeart();
+}
+
+function appendCircleCard(list, c, opts = {}) {
+  const from = opts.from || "discover";
+  const card = el("div", "circle-card");
+  card.innerHTML =
+    `<div class="cc-top">` +
+      `<img src="${c.icon}" alt="" />` +
+      `<div class="cc-text">` +
+        `<div class="c-title">${escapeHTML(c.title)}</div>` +
+        `<div class="c-meta">` +
+          `<span class="c-duration">${escapeHTML(c.duration)}</span>` +
+          `<span class="c-dot">•</span>` +
+          `<span class="c-people">${ICONS.person2}</span>` +
+          `<span class="c-count">${c.members}</span>` +
+        `</div>` +
+      `</div>` +
+    `</div>` +
+    `<div class="c-desc">${escapeHTML(c.desc)}</div>` +
+    `<div class="cc-footer">` +
+      `<button class="c-like ${c.liked ? "liked" : ""}" aria-label="Like">${c.liked ? ICONS["heart-fill"] : ICONS.heart}</button>` +
+      `<button class="c-join">Join</button>` +
+    `</div>`;
+  $(".c-like", card).addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleCircleLike(c);
+  });
+  // DiscoverView.onJoin → fullScreenCover HabitDetailView(isJoinLocked: true)
+  $(".c-join", card).addEventListener("click", (e) => {
+    e.stopPropagation();
+    openDetail(previewTaskFromCircle(c), 0, { from, joinLocked: true });
+  });
+  list.appendChild(card);
+}
+
 function renderChips() {
   const chips = $("#chipRow");
   chips.innerHTML = "";
@@ -724,46 +781,33 @@ function previewTaskFromCircle(c) {
 
 function renderCircleList() {
   const list = $("#circleList");
+  if (!list) return;
   list.innerHTML = "";
-  filteredCircles().forEach((c) => {
-    const card = el("div", "circle-card");
-    card.innerHTML =
-      `<div class="cc-top">` +
-        `<img src="${c.icon}" alt="" />` +
-        `<div class="cc-text">` +
-          `<div class="c-title">${escapeHTML(c.title)}</div>` +
-          `<div class="c-meta">` +
-            `<span class="c-duration">${escapeHTML(c.duration)}</span>` +
-            `<span class="c-dot">•</span>` +
-            `<span class="c-people">${ICONS.person2}</span>` +
-            `<span class="c-count">${c.members}</span>` +
-          `</div>` +
-        `</div>` +
-      `</div>` +
-      `<div class="c-desc">${escapeHTML(c.desc)}</div>` +
-      `<div class="cc-footer">` +
-        `<button class="c-like ${c.liked ? "liked" : ""}" aria-label="Like">${c.liked ? ICONS["heart-fill"] : ICONS.heart}</button>` +
-        `<button class="c-join">Join</button>` +
+  filteredCircles().forEach((c) => appendCircleCard(list, c, { from: "discover" }));
+}
+
+function renderSavedList() {
+  const list = $("#savedList");
+  if (!list) return;
+  list.innerHTML = "";
+  const liked = likedCircles();
+  if (!liked.length) {
+    list.innerHTML =
+      `<div class="saved-empty">` +
+        `<div class="saved-empty-ico">${ICONS.heart}</div>` +
+        `<div class="saved-empty-title">No saved circles yet</div>` +
+        `<p class="saved-empty-sub">Heart a circle on Discover and it will show up here.</p>` +
       `</div>`;
-    const like = $(".c-like", card);
-    like.addEventListener("click", (e) => {
-      e.stopPropagation();
-      c.liked = !c.liked;
-      like.classList.toggle("liked", c.liked);
-      like.innerHTML = c.liked ? ICONS["heart-fill"] : ICONS.heart;
-    });
-    // DiscoverView.onJoin → fullScreenCover HabitDetailView(isJoinLocked: true)
-    $(".c-join", card).addEventListener("click", (e) => {
-      e.stopPropagation();
-      openDetail(previewTaskFromCircle(c), 0, { from: "discover", joinLocked: true });
-    });
-    list.appendChild(card);
-  });
+    return;
+  }
+  liked.forEach((c) => appendCircleCard(list, c, { from: "saved" }));
 }
 
 function renderDiscover() {
   renderChips();
   renderCircleList();
+  renderSavedList();
+  updateHomeHeart();
   $("#discoverSearch").addEventListener("input", (e) => {
     discoverSearch = e.target.value;
     renderCircleList();
@@ -1743,11 +1787,15 @@ function init() {
   $$(".tab").forEach((t) => t.addEventListener("click", () => showScreen(t.dataset.tab)));
   $$("[data-nav]").forEach((b) => b.addEventListener("click", () => showScreen(b.dataset.nav)));
 
-  // Detail back dismisses to Discover when opened from Join, else Home.
+  // Detail back dismisses to Discover / Saved when opened from those, else Home.
   $("#detailBack").addEventListener("click", () => {
-    showScreen(vm && vm.openedFrom === "discover" ? "discover" : "home");
+    const from = vm && vm.openedFrom;
+    showScreen(from === "discover" || from === "saved" ? from : "home");
   });
   $("#joinViewBtn").addEventListener("click", joinCircle);
+
+  $("#homeHeart").addEventListener("click", () => showScreen("saved"));
+  $("#savedBack").addEventListener("click", () => showScreen("home"));
 
   $("#ctaBtn").addEventListener("click", () => {
     if (vm.isCompleted || vm.isJoinLocked) return;

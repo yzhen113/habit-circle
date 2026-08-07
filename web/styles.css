@@ -544,6 +544,43 @@ input, textarea {
 }
 
 /* ==========================================================================
+   SAVED — hearted Discover circles (Home heart icon)
+   ========================================================================== */
+.screen[data-screen="saved"] {
+  padding-top: calc(var(--safe-top) + var(--header-v-pad));
+}
+.saved-header {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px var(--tabbar-h-pad);
+  min-height: 50px;
+  flex: 0 0 auto;
+}
+.saved-title {
+  font-size: 16px; font-weight: 500; color: var(--black);
+}
+.saved-header .icon-btn.back { left: var(--tabbar-h-pad); }
+.saved-scroll {
+  flex: 1; min-height: 0; overflow-y: auto;
+}
+.saved-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; text-align: center;
+  padding: 80px var(--h-pad) var(--scroll-bottom);
+  color: var(--dark-gray);
+}
+.saved-empty-ico {
+  font-size: 36px; line-height: 0; color: var(--medium-gray);
+}
+.saved-empty-title {
+  font-size: 17px; font-weight: 600; color: var(--black);
+}
+.saved-empty-sub {
+  font-size: 14px; line-height: 20px; max-width: 260px;
+}
+.header-icon.has-saved { color: var(--pink); }
+
+/* ==========================================================================
    HABIT DETAIL — HabitDetailView.swift
    ========================================================================== */
 .screen[data-screen="detail"] {
