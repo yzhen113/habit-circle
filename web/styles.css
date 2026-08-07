@@ -204,7 +204,8 @@ input, textarea {
 
 .home-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: var(--header-v-pad) var(--tabbar-h-pad);
+  /* Left matches Discover title (h-pad); right keeps the heart on the tab-bar inset. */
+  padding: var(--header-v-pad) var(--tabbar-h-pad) var(--header-v-pad) var(--h-pad);
   flex: 0 0 auto;
 }
 .header-icon {
