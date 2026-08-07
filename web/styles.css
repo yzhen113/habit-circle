@@ -553,6 +553,7 @@ input, textarea {
 
 .detail-header {
   position: relative;
+  z-index: 5; /* above join-gate so Back stays tappable while locked */
   display: flex; align-items: center; justify-content: center;
   padding: 12px 26px;              /* horizontalPadding + 10 */
   min-height: 50px;                /* tallest child is the 22pt bubble.left glyph */
@@ -782,6 +783,7 @@ input, textarea {
   position: absolute; inset: 0; z-index: 4;
   display: flex; align-items: center; justify-content: center;
   background: rgba(255, 255, 255, 0.25);
+  /* Overlay stays visual-only so the header Back button keeps receiving taps. */
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -790,7 +792,6 @@ input, textarea {
 .detail-join-locked .join-gate {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
 }
 .join-view-btn {
   pointer-events: auto; cursor: pointer; border: none; font-family: inherit;
