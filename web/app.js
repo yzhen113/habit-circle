@@ -69,6 +69,11 @@ const ICONS = {
   "chevron-right": svg(stroke("M9 4.5 16 12l-7 7.5", 2.2)),
   checkmark: svg(stroke("M5 12.5 9.5 17 19 6.5", 2.6)),
   "checkmark-seal": svg(`<path d="${sealPath()}"/>` + '<path d="M8.1 12.3 10.8 15 16 8.9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'),
+  /// arrow.uturn.backward — swipe-right undo affordance on completed rows.
+  undo: svg(
+    stroke("M9 14 4 9l5-5", 2.4) +
+    '<path d="M4 9h9a5 5 0 0 1 0 10h-3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  ),
   plus: svg(stroke("M12 5v14M5 12h14", 2.2)),
   xmark: svg(stroke("M6 6l12 12M18 6 6 18", 2.6)),
   "arrow-up": svg(stroke("M12 19V5M5.5 11.5 12 5l6.5 6.5", 2.2)),
@@ -349,7 +354,7 @@ function emptyStateEl() {
   return wrap;
 }
 
-/* TaskCardView + SwipeToCompleteRow */
+/* TaskCardView + SwipeToCompleteRow / swipe-right undo */
 function buildSwipeRow(task) {
   const a = ACCENTS[task.cat];
   const row = el("div", "swipe-row" + (task.done ? " done" : "") + (task.photo ? " photo" : ""));
@@ -357,8 +362,11 @@ function buildSwipeRow(task) {
   row.style.setProperty("--tint", a.tint);
   row.style.setProperty("--accent", a.accent);
   const peopleIcon = task.members > 1 ? ICONS.person2 : ICONS.person;
+  // Pending rows reveal a tinted checkmark from the trailing edge; done rows
+  // reveal a grey undo arrow from the leading edge (SwipeActionBackground).
+  const actionIcon = task.done ? ICONS.undo : ICONS.checkmark;
   row.innerHTML =
-    `<div class="complete-action"><div class="ca-pill"><span class="ca-check">${ICONS.checkmark}</span></div></div>` +
+    `<div class="complete-action${task.done ? " undo" : ""}"><div class="ca-pill"><span class="ca-check">${actionIcon}</span></div></div>` +
     `<div class="task-card"${task.done ? "" : ` style="background:${a.tint}"`}>` +
       `<div class="t-row">` +
         `<img class="t-icon" src="${a.icon}" alt="" />` +
@@ -426,7 +434,7 @@ function selectDay(offset, dir) {
   renderHeader(headerTitleFor(offset), changed ? direction : 0);
 }
 
-/* ---------- Swipe-to-complete ---------- */
+/* ---------- Swipe-to-complete / swipe-right undo ---------- */
 const SWIPE_GAP = 10; // SwipeActionLayout.actionGap
 
 function updatePill(row, off, animate) {
@@ -436,7 +444,8 @@ function updatePill(row, off, animate) {
 
   const rowW = row.clientWidth;
   const rowH = row.clientHeight;
-  const pill = Math.max(0, -off - SWIPE_GAP);
+  const undo = off > 0; // leading-edge reveal
+  const pill = Math.max(0, Math.abs(off) - SWIPE_GAP);
   const minD = Math.min(68, rowH - 20);
   const vw = pill <= 4 ? 0 : Math.max(pill, minD);
 
@@ -444,15 +453,19 @@ function updatePill(row, off, animate) {
   const prog = clamp((vw - minD) / (expandEnd - minD), 0, 1);
   const ph = minD + (rowH - minD) * prog;
 
+  const action = $(".complete-action", row);
   const pillEl = $(".ca-pill", row);
   const check = $(".ca-check", row);
+  action.classList.toggle("undo", undo || row.classList.contains("done"));
   pillEl.style.transition = animate
     ? "width .34s cubic-bezier(.2,.8,.2,1), height .34s cubic-bezier(.2,.8,.2,1)"
     : "none";
   pillEl.style.width = vw + "px";
   pillEl.style.height = (vw > 0 ? ph : minD) + "px";
   check.style.opacity = vw > 10 ? "1" : "0";
-  pillEl.classList.toggle("lead", pill >= rowW * 0.8);
+  // Past 80% the icon parks on the open edge (leading for complete, trailing for undo).
+  pillEl.classList.toggle("lead", !undo && pill >= rowW * 0.8);
+  pillEl.classList.toggle("trail", undo && pill >= rowW * 0.8);
   row.dataset.off = String(off);
 }
 
@@ -463,33 +476,34 @@ function springCardBack(row) {
   updatePill(row, 0, true);
 }
 
-function finishCardSwipe(row) {
+function finishCardSwipe(row, isUndo) {
   const maxReveal = row.clientWidth * 0.92;
-  updatePill(row, -(maxReveal + SWIPE_GAP), true);
+  const limit = maxReveal + SWIPE_GAP;
+  updatePill(row, isUndo ? limit : -limit, true);
   setTimeout(() => {
     updatePill(row, 0, true);
     setTimeout(() => {
       const offset = Number(row.closest(".day-slot").dataset.offset);
-      completeTaskAndReflow(offset, row.dataset.id);
+      setTaskCompletedAndReflow(offset, row.dataset.id, !isUndo);
     }, 300);
   }, 170);
 }
 
-// Marks a task done and animates the reorder (FLIP) so it drops to the bottom.
-function completeTaskAndReflow(offset, id) {
+/// HomeViewModel.setCompleted — flips done and FLIP-animates the reorder.
+function setTaskCompletedAndReflow(offset, id, isCompleted) {
   const task = tasksFor(offset).find((t) => t.id === id);
-  if (!task || task.done) return;
+  if (!task || task.done === isCompleted) return;
 
   const slot = currentSlotEl();
   if (!slot || Number(slot.dataset.offset) !== offset) {
-    task.done = true;
+    task.done = isCompleted;
     return;
   }
   const listEl = $(".task-list", slot);
   const first = new Map();
   $$(".swipe-row", listEl).forEach((r) => first.set(r.dataset.id, r.getBoundingClientRect()));
 
-  task.done = true;
+  task.done = isCompleted;
   renderTaskList(listEl, offset);
 
   $$(".swipe-row", listEl).forEach((r) => {
@@ -508,6 +522,10 @@ function completeTaskAndReflow(offset, id) {
       })
     );
   });
+}
+
+function completeTaskAndReflow(offset, id) {
+  setTaskCompletedAndReflow(offset, id, true);
 }
 
 /* ---------- Day paging ---------- */
@@ -535,10 +553,13 @@ function onPagerPointerDown(e) {
   if (e.pointerType === "mouse" && e.button !== 0) return;
   const cur = $("#dayTrack").children[1];
   const row = e.target.closest(".swipe-row");
+  const onRow = row && cur.contains(row) ? row : null;
   drag = {
     startX: e.clientX, startY: e.clientY, x: e.clientX,
     t: performance.now(), vx: 0, axis: null, mode: null,
-    row: row && cur.contains(row) && !row.classList.contains("done") ? row : null,
+    // Done rows swipe right to undo; pending rows swipe left to complete.
+    row: onRow,
+    undo: !!(onRow && onRow.classList.contains("done")),
     pagerW: $("#dayPager").clientWidth,
   };
 }
@@ -556,14 +577,20 @@ function onPagerPointerMove(e) {
     if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
     drag.axis = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
     if (drag.axis === "v") return; // let the day scroll vertically
-    drag.mode = drag.row && dx < 0 ? "card" : "page";
+    // Card swipe only in the action direction for that row; otherwise page days.
+    const cardDir =
+      drag.row && ((drag.undo && dx > 0) || (!drag.undo && dx < 0));
+    drag.mode = cardDir ? "card" : "page";
   }
   if (drag.axis !== "h") return;
   e.preventDefault();
 
   if (drag.mode === "card") {
     const rowW = drag.row.clientWidth;
-    const off = Math.max(Math.min(0, dx), -(rowW * 0.92 + SWIPE_GAP));
+    const limit = rowW * 0.92 + SWIPE_GAP;
+    const off = drag.undo
+      ? Math.min(Math.max(0, dx), limit)
+      : Math.max(Math.min(0, dx), -limit);
     updatePill(drag.row, off, false);
   } else {
     let d = dx;
@@ -583,8 +610,10 @@ function onPagerPointerUp(e) {
 
   if (d.mode === "card") {
     const rowW = d.row.clientWidth;
-    const pill = Math.max(0, -currentCardOffset(d.row) - SWIPE_GAP);
-    if (pill >= rowW * 0.52 || d.vx < -0.9) finishCardSwipe(d.row);
+    const off = currentCardOffset(d.row);
+    const pill = Math.max(0, Math.abs(off) - SWIPE_GAP);
+    const flicked = d.undo ? d.vx > 0.9 : d.vx < -0.9;
+    if (pill >= rowW * 0.52 || flicked) finishCardSwipe(d.row, d.undo);
     else springCardBack(d.row);
   } else {
     const dx = e.clientX - d.startX;
@@ -786,7 +815,10 @@ function makeViewModel(task, offset) {
    Figma "habut circle complete": a 280x280.87 ring, centreline radius 126.957,
    stroke 26.087. The arc runs clockwise from 12 o'clock. Its radial gradient is
    centred on the start point, so the tail dissolves into the track while the
-   head reaches full colour — the "solid at the end, fading tail" look. */
+   head reaches full colour — the "solid at the end, fading tail" look.
+
+   Closing out mirrors HabitDetailView.RingArcLayers: as the sweep nears 1 the
+   fade shortens (closeProgress) so the ring seals itself instead of snapping. */
 const RING_CIRC = 2 * Math.PI * RING_R;
 const RING_HI_LAG = 2;      // degrees behind the arc's leading tip
 /// The tail dissolves over this share of the arc travelled — measured off Figma, where
@@ -794,7 +826,10 @@ const RING_HI_LAG = 2;      // degrees behind the arc's leading tip
 /// the sweep rather than a fixed angle keeps the fade clear of the tip at every size.
 const RING_FADE_SHARE = 0.55;
 const RING_FADE_MAX = 170;
+const RING_CLOSE_START = 0.88; // fade begins closing up here (Swift closeFadeStart)
 const RING_MS = 900;
+/// Extra time when sealing all the way shut — gives the closeProgress fade room to breathe.
+const RING_CLOSE_MS = 1200;
 
 /* Fixed grey palette used until the user has completed the habit. */
 const RING_GREY = { track: LIGHT_GRAY, head: "#898989", hi: LIGHT_GRAY };
@@ -804,17 +839,54 @@ function ringPalette() {
   return { track: vm.tint, head: vm.accent, hi: vm.tint };
 }
 
+/// cubic-bezier(0.2, 0.8, 0.2, 1) — matches Swift timingCurve / CSS ease used elsewhere.
+function ringEase(t) {
+  // Unit bezier: P0=(0,0), P1=(0.2,0.8), P2=(0.2,1), P3=(1,1)
+  // Solve x(t)=T for t via Newton, then return y(t).
+  const cx = 3 * 0.2;
+  const bx = 3 * (0.2 - 0.2) - cx;
+  const ax = 1 - cx - bx;
+  const cy = 3 * 0.8;
+  const by = 3 * (1 - 0.8) - cy;
+  const ay = 1 - cy - by;
+  let u = t;
+  for (let i = 0; i < 6; i++) {
+    const x = ((ax * u + bx) * u + cx) * u - t;
+    const dx = (3 * ax * u + 2 * bx) * u + cx;
+    if (Math.abs(dx) < 1e-6) break;
+    u -= x / dx;
+  }
+  return ((ay * u + by) * u + cy) * u;
+}
+
+function ringCloseProgress(f) {
+  if (f <= RING_CLOSE_START) return 0;
+  return Math.min(1, (f - RING_CLOSE_START) / (1 - RING_CLOSE_START));
+}
+
 /// Transparent at the arc's start, full colour well before the tip. The arc fades into
-/// the track underneath it, which is what the "dissolving tail" reads as.
+/// the track underneath it, which is what the "dissolving tail" reads as. As the ring
+/// seals, closeProgress shortens the fade until a solid mask takes over unnoticed.
 function ringFadeMask(f) {
-  const end = Math.min(RING_FADE_MAX, 360 * f * RING_FADE_SHARE);
-  if (end < 0.5) return "none";
+  const close = ringCloseProgress(f);
+  const end = Math.min(RING_FADE_MAX, 360 * f * RING_FADE_SHARE) * (1 - close);
+  if (f >= 1 || end < 0.5) return "none";
   const stop = (deg, a) => `rgba(0,0,0,${a}) ${deg.toFixed(2)}deg`;
+  // Head of the arc stays opaque; clear past it so the 360°/0° seam lands on empty track.
+  const headDeg = Math.min(360 * f + 0.7, 359.5);
   // A conic gradient's 0deg already points at 12 o'clock and runs clockwise, matching
   // the arc — so no `from` rotation, or the fade lands on the tip instead of the tail.
   return (
     "conic-gradient(at 50% 50%," +
-    [stop(0, 0), stop(end * 0.3, 0.28), stop(end * 0.62, 0.72), stop(end, 1), stop(360, 1)].join(",") +
+    [
+      stop(0, 0),
+      stop(end * 0.3, 0.28),
+      stop(end * 0.62, 0.72),
+      stop(end, 1),
+      stop(headDeg, 1),
+      stop(Math.min(headDeg + 0.4, 360), 0),
+      stop(360, 0),
+    ].join(",") +
     ")"
   );
 }
@@ -827,21 +899,25 @@ function setRing(fraction) {
   const layer = $("#ringArcLayer");
   const rot = $("#ringHiRot");
   const tip = $("#ringTipRot");
+  const close = ringCloseProgress(f);
+  const hasArc = f > 0.0001;
 
   arc.style.strokeDasharray = `${(f * RING_CIRC).toFixed(2)} ${RING_CIRC.toFixed(2)}`;
-  // A full ring has no tail to dissolve and no leading tip to mark.
-  const mask = f >= 1 ? "none" : ringFadeMask(f);
+  const mask = ringFadeMask(f);
   layer.style.maskImage = mask;
   layer.style.webkitMaskImage = mask;
 
-  const hidden = f <= 0.0001 || f >= 1 ? "0" : "";
-  tip.style.opacity = hidden;
-  rot.style.opacity = hidden;
+  // Tip stays at full strength through 1 — it lands on the arc's own start and
+  // disappears into it. Gloss eases out over closeProgress (.ring-hi keeps its 0.7).
+  tip.style.opacity = hasArc ? "1" : "0";
+  rot.style.opacity = hasArc ? String(1 - close) : "0";
   tip.style.transform = `rotate(${(360 * f).toFixed(2)}deg)`;
   rot.style.transform = `rotate(${(360 * f - RING_HI_LAG).toFixed(2)}deg)`;
+  ringFraction = f;
 }
 
 let ringAnim = 0;
+let ringFraction = 0;
 
 function renderRing(fraction, animate) {
   const p = ringPalette();
@@ -852,19 +928,21 @@ function renderRing(fraction, animate) {
 
   cancelAnimationFrame(ringAnim);
   const target = clamp(fraction, 0, 1);
-  if (!animate) {
+  const from = animate ? ringFraction : target;
+  if (!animate || Math.abs(target - from) < 0.0005) {
     setRing(target);
     return;
   }
 
-  // Matches the cubic-bezier(.2, .8, .2, 1) the rest of the screen eases with.
-  const ease = (t) => 1 - Math.pow(1 - t, 4);
+  // Seal-shut (→ 1) gets a longer, softer ease so the closeProgress fade can finish.
+  const sealing = target >= 0.999 && from < RING_CLOSE_START;
+  const duration = sealing ? RING_CLOSE_MS : RING_MS;
   const t0 = performance.now();
-  setRing(0);
   const step = (now) => {
-    const t = Math.min(1, (now - t0) / RING_MS);
-    setRing(target * ease(t));
+    const t = Math.min(1, (now - t0) / duration);
+    setRing(from + (target - from) * ringEase(t));
     if (t < 1) ringAnim = requestAnimationFrame(step);
+    else setRing(target);
   };
   ringAnim = requestAnimationFrame(step);
 }
@@ -972,6 +1050,7 @@ function updateCta() {
 
 function openDetail(task, offset) {
   vm = makeViewModel(task, offset);
+  ringFraction = 0; // entrance always sweeps from empty
   renderDetail(true);
   renderChat();
   showScreen("detail");
@@ -986,7 +1065,8 @@ function finishCompletion() {
   if (today) today.fraction = vm.progressFraction;
   if (vm.requiresPhoto) vm.chatUnlocked = true;
 
-  renderDetail(false);
+  // Animate the ring from its current paint to the new fraction (incl. seal-shut).
+  renderDetail(true);
   updateChatChrome();
 
   const task = tasksFor(vm.offset).find((t) => t.id === vm.taskID);

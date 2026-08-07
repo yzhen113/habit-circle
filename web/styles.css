@@ -294,11 +294,16 @@ input, textarea {
   position: absolute; inset: 0; display: flex; align-items: center;
   justify-content: flex-end; pointer-events: none;
 }
+/* Undo grows from the leading edge with a grey pill (matches completed card). */
+.complete-action.undo { justify-content: flex-start; }
+.complete-action.undo .ca-pill { background: var(--light-gray); }
+.complete-action.undo .ca-check { color: var(--dark-gray); }
 .ca-pill {
   width: 0; height: 56px; background: var(--tint); border-radius: 100px;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .ca-pill.lead { justify-content: flex-start; padding-left: 22px; }
+.ca-pill.trail { justify-content: flex-end; padding-right: 22px; }
 .ca-check { color: var(--accent); display: flex; opacity: 0; }
 .ca-check .ic { width: 20px; height: 20px; stroke-width: 2.6; }
 
@@ -663,18 +668,28 @@ input, textarea {
 /* --- Progress ring: Figma 280 x 280.87, r 126.957, stroke 26.087 --- */
 .ring-wrap { position: relative; width: 280px; height: 280.87px; margin: 24px auto 0; flex: 0 0 auto; }
 .ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.ring-track { fill: none; stroke: var(--ring-track); stroke-width: 26.087; }
+.ring-track {
+  fill: none; stroke: var(--ring-track); stroke-width: 26.087;
+  transition: stroke .45s cubic-bezier(.2,.8,.2,1);
+}
 /* Solid colour end to end; the tail is dissolved by the mask on #ringArcLayer, so the tip
    never picks up the fade. Butt caps, because a round cap at the start would bulge back
    past 12 o'clock into the opaque end of that mask; .ring-tip rounds off the head instead.
-   The sweep, the mask, the tip and the gloss are all stepped from one rAF loop, so nothing
-   here transitions on its own. */
+   Sweep / mask / tip / gloss are stepped from one rAF loop; only palette colours ease in CSS. */
 .ring-arc {
   fill: none; stroke: var(--ring-head); stroke-width: 26.087; stroke-linecap: butt;
+  transition: stroke .45s cubic-bezier(.2,.8,.2,1);
 }
-.ring-tip { fill: var(--ring-head); }
+.ring-tip {
+  fill: var(--ring-head);
+  transition: fill .45s cubic-bezier(.2,.8,.2,1);
+}
 .ring-rot { transform-box: view-box; transform-origin: 140px 140px; }
-.ring-hi { fill: var(--ring-hi); opacity: 0.7; }
+.ring-hi {
+  fill: var(--ring-hi);
+  opacity: 0.7;
+  transition: fill .45s cubic-bezier(.2,.8,.2,1);
+}
 .ring-center {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -687,9 +702,13 @@ input, textarea {
   color: var(--dark-gray);
   font-variant-numeric: diagonal-fractions;
   font-feature-settings: "frac" 1;
+  transition: color .45s cubic-bezier(.2,.8,.2,1);
 }
 .ring-caption { font-size: 11.13px; line-height: 14.84px; color: var(--dark-gray); width: 140.33px; margin: 0; }
-.ring-caption em { color: var(--black); font-style: italic; }
+.ring-caption em {
+  color: var(--black); font-style: italic;
+  transition: color .45s cubic-bezier(.2,.8,.2,1);
+}
 .detail-colored .ring-count,
 .detail-colored .ring-caption em { color: var(--accent); }
 
