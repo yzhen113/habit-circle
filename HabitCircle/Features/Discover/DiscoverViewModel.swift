@@ -11,11 +11,21 @@ final class DiscoverViewModel: ObservableObject {
         circles = DiscoverCircle.samples
     }
 
+    /// Hearted circles for the Home → Saved list.
+    var likedCircles: [DiscoverCircle] {
+        circles.filter(\.isLiked)
+    }
+
     var filteredCircles: [DiscoverCircle] {
-        circles.filter { circle in
-            guard searchText.isEmpty else {
-                return circle.title.localizedCaseInsensitiveContains(searchText)
-                    || circle.description.localizedCaseInsensitiveContains(searchText)
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return circles.filter { circle in
+            // While searching, match title + description across all categories.
+            if !query.isEmpty {
+                return circle.title.localizedCaseInsensitiveContains(query)
+                    || circle.description.localizedCaseInsensitiveContains(query)
+            }
+            if let selectedCategoryID, circle.filterCategoryID != selectedCategoryID {
+                return false
             }
             return true
         }
@@ -28,5 +38,9 @@ final class DiscoverViewModel: ObservableObject {
 
     func selectCategory(_ categoryID: String?) {
         selectedCategoryID = categoryID == selectedCategoryID ? nil : categoryID
+    }
+
+    func clearCategoryFilter() {
+        selectedCategoryID = nil
     }
 }

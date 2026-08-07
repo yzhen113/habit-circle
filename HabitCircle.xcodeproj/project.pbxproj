@@ -43,6 +43,7 @@
 		A10000010000000000000036 /* CreateFormControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000036 /* CreateFormControls.swift */; };
 		A10000010000000000000037 /* CameraSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000037 /* CameraSessionController.swift */; };
 		A10000010000000000000038 /* PhotoVerificationCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000038 /* PhotoVerificationCameraView.swift */; };
+		A10000010000000000000039 /* SavedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000039 /* SavedView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +83,7 @@
 		A20000010000000000000036 /* CreateFormControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFormControls.swift; sourceTree = "<group>"; };
 		A20000010000000000000037 /* CameraSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionController.swift; sourceTree = "<group>"; };
 		A20000010000000000000038 /* PhotoVerificationCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoVerificationCameraView.swift; sourceTree = "<group>"; };
+		A20000010000000000000039 /* SavedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedView.swift; sourceTree = "<group>"; };
 		A30000010000000000000001 /* HabitCircle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitCircle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -173,12 +175,21 @@
 			children = (
 				A50000010000000000000008 /* Home */,
 				A50000010000000000000010 /* Discover */,
+				A50000010000000000000015 /* Saved */,
 				A50000010000000000000011 /* Detail */,
 				A50000010000000000000012 /* Chat */,
 				A50000010000000000000013 /* Create */,
 				A50000010000000000000014 /* Camera */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		A50000010000000000000015 /* Saved */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000039 /* SavedView.swift */,
+			);
+			path = Saved;
 			sourceTree = "<group>";
 		};
 		A50000010000000000000013 /* Create */ = {
@@ -347,6 +358,7 @@
 				A10000010000000000000036 /* CreateFormControls.swift in Sources */,
 				A10000010000000000000037 /* CameraSessionController.swift in Sources */,
 				A10000010000000000000038 /* PhotoVerificationCameraView.swift in Sources */,
+				A10000010000000000000039 /* SavedView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

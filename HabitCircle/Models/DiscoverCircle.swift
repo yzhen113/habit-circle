@@ -36,6 +36,16 @@ struct DiscoverCircle: Identifiable, Equatable {
         }
     }
 
+    /// Discover chip id — matches `DiscoverCategory.id` / web `category`.
+    var filterCategoryID: String {
+        switch category {
+        case .fitness: return "physical"
+        case .food: return "eating"
+        case .routine: return "routine"
+        case .misc: return "misc"
+        }
+    }
+
     /// The circle rendered as a habit, for the locked Discover preview.
     var previewTask: TaskItem {
         .make(

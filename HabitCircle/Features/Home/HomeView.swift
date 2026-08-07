@@ -2,7 +2,9 @@ import SwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
+    @ObservedObject var discoverViewModel: DiscoverViewModel
     @State private var openedHabit: OpenedHabit?
+    @State private var showSaved = false
 
     var body: some View {
         VStack(spacing: 8) {
@@ -42,6 +44,9 @@ struct HomeView: View {
                 viewModel.markCompleted(offset: opened.offset, taskID: opened.task.id)
             }
         }
+        .fullScreenCover(isPresented: $showSaved) {
+            SavedView(viewModel: discoverViewModel)
+        }
     }
 
     private var daySelectionBinding: Binding<Int> {
@@ -66,9 +71,17 @@ struct HomeView: View {
 
             Spacer(minLength: 12)
 
-            Image(systemName: "heart")
-                .font(.system(size: AppLayout.heartIconSize, weight: .regular))
-                .foregroundStyle(AppColors.dateUnselected)
+            Button {
+                showSaved = true
+            } label: {
+                // Always outline — fill state lives on Discover/Saved card hearts only.
+                Image(systemName: "heart")
+                    .font(.system(size: AppLayout.heartIconSize, weight: .regular))
+                    .foregroundStyle(AppColors.dateUnselected)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, AppLayout.tabBarHorizontalPadding)
         .padding(.vertical, AppLayout.headerVerticalPadding)
@@ -127,5 +140,5 @@ struct OpenedHabit: Identifiable {
 }
 
 #Preview {
-    HomeView(viewModel: HomeViewModel())
+    HomeView(viewModel: HomeViewModel(), discoverViewModel: DiscoverViewModel())
 }

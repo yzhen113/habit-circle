@@ -27,7 +27,9 @@ struct CategoryChipRow: View {
                     .buttonStyle(.plain)
                 }
             }
+            // Leading pad matches cards; trailing pad is felt at the end of the scroll.
             .padding(.leading, AppLayout.horizontalPadding)
+            .padding(.trailing, AppLayout.horizontalPadding)
         }
     }
 }
