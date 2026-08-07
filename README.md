@@ -36,6 +36,13 @@ To run on your own physical device, sign in with a free Apple ID under
 ## Project structure
 
 ```
+HabitCircle/              iOS app source (SwiftUI)
+HabitCircle.xcodeproj/    Xcode project — open this to build/run the app
+web-prototype/            Interactive web prototype (GitHub Pages)
+design-refs/              Design reference assets
+```
+
+```
 HabitCircle/
   App/            App entry point and root tab view
   Features/       Screens grouped by feature
@@ -52,6 +59,16 @@ HabitCircle/
 
 Architecture: SwiftUI with lightweight `ObservableObject` view models per feature.
 Data is currently seeded from in-memory samples in the view models.
+
+## Web prototype
+
+The browser prototype lives in `web-prototype/` and deploys to
+[GitHub Pages](https://yzhen113.github.io/habit-circle/) on every push to `main`.
+
+```bash
+cd web-prototype
+python3 serve.py
+```
 
 ## Contributing
 

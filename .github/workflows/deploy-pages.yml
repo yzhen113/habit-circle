@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "web/**"
+      - "web-prototype/**"
       - ".github/workflows/deploy-pages.yml"
   workflow_dispatch:
 
@@ -30,10 +30,10 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload web/ as artifact
+      - name: Upload web-prototype/ as artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: web-prototype
 
       - name: Deploy to GitHub Pages
         id: deployment
