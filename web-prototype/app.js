@@ -681,10 +681,12 @@ function initHome() {
 function filteredCircles() {
   const q = discoverSearch.trim().toLowerCase();
   return CIRCLES.filter((c) => {
+    // While searching, match title + description across all categories (DiscoverViewModel).
+    if (q) {
+      return c.title.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+    }
     if (selectedCategoryID && c.category !== selectedCategoryID) return false;
-    if (!q) return true;
-    // Discover search matches habit / circle title only.
-    return c.title.toLowerCase().includes(q);
+    return true;
   });
 }
 
@@ -774,21 +776,21 @@ function renderCircleList() {
   const list = $("#circleList");
   if (!list) return;
   list.innerHTML = "";
-  const circles = filteredCircles();
-  if (!circles.length) {
+  const matches = filteredCircles();
+  if (!matches.length) {
     const q = discoverSearch.trim();
     list.innerHTML =
       `<div class="discover-empty">` +
-        `<div class="discover-empty-title">${q ? "No matching circles" : "No circles"}</div>` +
+        `<div class="discover-empty-title">${q ? "No matching circles" : "No circles here"}</div>` +
         `<p class="discover-empty-sub">${
           q
-            ? `Nothing titled “${escapeHTML(q)}”. Try another name.`
-            : "Try clearing the category filter."
+            ? `Nothing matched “${escapeHTML(q)}”. Try another title or description.`
+            : "Try a different category or clear the filter."
         }</p>` +
       `</div>`;
     return;
   }
-  circles.forEach((c) => appendCircleCard(list, c, { from: "discover" }));
+  matches.forEach((c) => appendCircleCard(list, c, { from: "discover" }));
 }
 
 function renderSavedList() {
@@ -812,10 +814,15 @@ function renderDiscover() {
   renderChips();
   renderCircleList();
   renderSavedList();
-  $("#discoverSearch").addEventListener("input", (e) => {
-    discoverSearch = e.target.value;
+  const search = $("#discoverSearch");
+  const applySearch = () => {
+    discoverSearch = search.value;
     renderCircleList();
-  });
+  };
+  search.addEventListener("input", applySearch);
+  search.addEventListener("search", applySearch);
+  // Whole capsule focuses the field — icon / padding taps count too.
+  $(".search").addEventListener("click", () => search.focus());
   // Tap empty space around the filters (not on a pill or card) to clear the active filter.
   $("#discoverScroll").addEventListener("click", (e) => {
     if (e.target.closest(".chip, .circle-card, button, a, input")) return;

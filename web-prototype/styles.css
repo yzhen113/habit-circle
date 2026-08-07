@@ -476,12 +476,14 @@ input, textarea {
   height: 36px; padding: 0 16px;
   border-radius: 999px; background: var(--light-gray);
   display: flex; align-items: center; gap: 7px;
+  cursor: text;
 }
-.search .search-ico { font-size: 14px; color: var(--dark-gray); line-height: 0; }
+.search .search-ico { font-size: 14px; color: var(--dark-gray); line-height: 0; flex: 0 0 auto; pointer-events: none; }
 .search input {
   border: none; background: transparent; outline: none;
   font-family: inherit; font-size: 14px; font-weight: 400; color: var(--black);
-  width: 100%; padding: 0;
+  width: 100%; padding: 0; min-width: 0;
+  -webkit-user-select: text; user-select: text; cursor: text;
 }
 .search input::placeholder { color: var(--placeholder); }
 
@@ -514,12 +516,17 @@ input, textarea {
   display: flex; flex-direction: column; gap: 10px;
 }
 .discover-empty {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: 8px; padding: 48px 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; text-align: center;
+  padding: 48px 12px 24px;
   color: var(--dark-gray);
 }
-.discover-empty-title { font-size: 17px; font-weight: 600; color: var(--black); }
-.discover-empty-sub { font-size: 14px; line-height: 20px; max-width: 260px; margin: 0; }
+.discover-empty-title {
+  font-size: 17px; font-weight: 600; color: var(--black);
+}
+.discover-empty-sub {
+  font-size: 14px; line-height: 20px; max-width: 260px;
+}
 
 /* DiscoverCircleCard — VStack(spacing: 14), padding 22, radius 15 */
 .circle-card {
