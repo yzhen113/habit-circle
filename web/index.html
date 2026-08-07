@@ -6,7 +6,7 @@
   <title>Habit Circle — Interactive Prototype</title>
   <meta name="description" content="Habit Circle: build habits together in small accountability circles." />
   <link rel="icon" href="assets/AppIcon.png?v=2" type="image/png" />
-  <link rel="stylesheet" href="styles.css?v=55" />
+  <link rel="stylesheet" href="styles.css?v=58" />
 </head>
 <body>
   <div class="stage">
@@ -42,25 +42,28 @@
 
           <!-- DISCOVER -->
           <section class="screen" data-screen="discover">
+            <!-- Title + search stay put; chips scroll away with the cards. -->
             <header class="discover-header">
               <h2 class="discover-title">Discover</h2>
               <div class="search">
                 <span class="search-ico" data-icon="search"></span>
                 <input id="discoverSearch" placeholder="Search..." />
               </div>
-              <div class="chips-scroll"><div class="chips" id="chipRow"></div></div>
             </header>
-            <div class="circle-list" id="circleList"></div>
+            <div class="discover-scroll" id="discoverScroll">
+              <div class="chips-scroll"><div class="chips" id="chipRow"></div></div>
+              <div class="circle-list" id="circleList"></div>
+            </div>
           </section>
 
           <!-- DETAIL -->
           <section class="screen" data-screen="detail">
             <header class="detail-header">
-              <button class="icon-btn back" data-nav="home" data-icon="chevron-left" aria-label="Back"></button>
+              <button class="icon-btn back" id="detailBack" data-icon="chevron-left" aria-label="Back"></button>
               <span class="detail-title" id="detailCircle">Stairmasterers</span>
               <button class="icon-btn chat-btn" data-nav="chat" data-icon="bubble-left" aria-label="Chat"></button>
             </header>
-            <div class="detail-scroll">
+            <div class="detail-scroll" id="detailScroll">
               <div class="habit-info">
                 <img class="habit-icon" id="detailIcon" src="assets/circle-fitness.png" alt="" />
                 <div class="habit-meta">
@@ -121,6 +124,13 @@
             </div>
             <div class="detail-cta">
               <button class="cta-btn" id="ctaBtn"><span class="cta-ico" data-icon="camera"></span><span class="cta-label">Verify with Photo</span></button>
+            </div>
+            <!-- Discover preview gate — HabitDetailView.joinGate -->
+            <div class="join-gate" id="joinGate">
+              <button class="join-view-btn" id="joinViewBtn">
+                <span class="join-view-ico" data-icon="person-badge-plus"></span>
+                <span>Join to view</span>
+              </button>
             </div>
           </section>
 
@@ -361,6 +371,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=58"></script>
 </body>
 </html>

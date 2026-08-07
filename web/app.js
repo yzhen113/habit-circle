@@ -108,6 +108,13 @@ const ICONS = {
     "0 0 13 8"
   ),
   alarm: svg('<circle cx="12" cy="13.2" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/>' + stroke("M12 10.2v3.4l2.2 1.4", 1.8) + stroke("M4.6 6.2 7.2 3.8", 1.8) + stroke("M19.4 6.2 16.8 3.8", 1.8)),
+  /// person.badge.plus — Discover "Join to view" gate.
+  "person-badge-plus": svg(
+    '<path d="M11 12.2a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2z"/>' +
+    '<path d="M4.2 19.2c0-3.2 3-5 6.8-5 1.1 0 2.1.1 3 .4"/>' +
+    '<circle cx="17.6" cy="15.4" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/>' +
+    stroke("M17.6 13.4v4M15.6 15.4h4", 1.7)
+  ),
 };
 
 function injectStaticIcons(root = document) {
@@ -217,11 +224,14 @@ function sortedTasks(o) {
 
 /* ---------- Discover model — DiscoverCircle.swift ---------- */
 const CIRCLES = [
-  { title: "Weight Training for Beginners", duration: "3 months", members: 10, icon: "assets/circle-fitness.png",
+  { title: "Weight Training for Beginners", duration: "3 months", members: 10, category: "physical",
+    icon: "assets/circle-fitness.png",
     desc: "Overcoming the fear of weights and empowered to get stronger in the gym!", liked: false },
-  { title: "Healthy Vegans", duration: "2 weeks", members: 26, icon: "assets/circle-eating.png",
+  { title: "Healthy Vegans", duration: "2 weeks", members: 26, category: "eating",
+    icon: "assets/circle-eating.png",
     desc: "Trying to find healthy, vegan meals that are tasty, inexpensive, and quick.", liked: false },
-  { title: "Screen Time Under 4 Hours", duration: "6 months", members: 82, icon: "assets/circle-routine.png",
+  { title: "Screen Time Under 4 Hours", duration: "6 months", members: 82, category: "routine",
+    icon: "assets/circle-routine.png",
     desc: "Too much doom scrolling. Let's keep each other accountable with no phone time.", liked: false },
 ];
 const CATEGORIES = [
@@ -252,7 +262,8 @@ function showScreen(name) {
   if (name === "detail") {
     $(".detail-scroll").scrollTop = 0;
   } else if (name === "discover") {
-    $("#circleList").scrollTop = 0;
+    const sc = $("#discoverScroll");
+    if (sc) sc.scrollTop = 0;
   }
 }
 
@@ -659,10 +670,11 @@ function initHome() {
    ========================================================================== */
 function filteredCircles() {
   const q = discoverSearch.trim().toLowerCase();
-  if (!q) return CIRCLES;
-  return CIRCLES.filter(
-    (c) => c.title.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q)
-  );
+  return CIRCLES.filter((c) => {
+    if (selectedCategoryID && c.category !== selectedCategoryID) return false;
+    if (!q) return true;
+    return c.title.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+  });
 }
 
 function renderChips() {
@@ -674,8 +686,26 @@ function renderChips() {
       // Tapping the selected chip clears the selection (DiscoverViewModel.selectCategory).
       selectedCategoryID = selectedCategoryID === cat.id ? null : cat.id;
       renderChips();
+      renderCircleList();
     });
     chips.appendChild(chip);
+  });
+}
+
+/// DiscoverCircle.category / icon asset → TaskCategory for detail accents.
+function circleCategory(c) {
+  if (c.category === "physical" || c.icon.includes("fitness")) return "fitness";
+  if (c.category === "eating" || c.icon.includes("eating")) return "food";
+  if (c.category === "routine" || c.icon.includes("routine")) return "routine";
+  return "misc";
+}
+
+/// DiscoverCircle.previewTask — locked habit opened from Join.
+function previewTaskFromCircle(c) {
+  return mkTask(c.title, "7:00AM", c.members, circleCategory(c), {
+    photo: true,
+    circle: c.title,
+    duration: c.duration,
   });
 }
 
@@ -709,6 +739,11 @@ function renderCircleList() {
       like.classList.toggle("liked", c.liked);
       like.innerHTML = c.liked ? ICONS["heart-fill"] : ICONS.heart;
     });
+    // DiscoverView.onJoin → fullScreenCover HabitDetailView(isJoinLocked: true)
+    $(".c-join", card).addEventListener("click", (e) => {
+      e.stopPropagation();
+      openDetail(previewTaskFromCircle(c), 0, { from: "discover", joinLocked: true });
+    });
     list.appendChild(card);
   });
 }
@@ -739,11 +774,12 @@ function friendsCompletedToday(task, memberCount) {
   return clamp(Math.round(others * 0.75), 1, others);
 }
 
-function makeViewModel(task, offset) {
+function makeViewModel(task, offset, opts = {}) {
   const a = ACCENTS[task.cat];
   const memberCount = Math.max(task.members, 1);
   const completedCount = friendsCompletedToday(task, memberCount) + (task.done ? 1 : 0);
   const todayFraction = completedCount / memberCount;
+  const isJoinLocked = !!opts.joinLocked;
 
   return {
     offset,
@@ -760,9 +796,13 @@ function makeViewModel(task, offset) {
     tint: a.tint,
     icon: a.icon,
     isCompleted: task.done,
+    /// Discover preview — content stays behind "Join to view" until join().
+    isJoinLocked,
+    /// Where Back should land (Discover fullScreenCover vs Home task tap).
+    openedFrom: opts.from || "home",
     /// The circle chat is where members post their proof, so a habit that doesn't ask for
-    /// a photo has no thread to open at all.
-    hasChat: task.photo,
+    /// a photo has no thread to open at all. A locked Discover preview has no chat either.
+    hasChat: task.photo && !isJoinLocked,
     chatUnlocked: task.photo ? task.done : true,
     photoHistory: task.photo
       ? ["assets/gym-treadmill.png", "assets/gym-stairmaster.png", "assets/gym-console.png", "assets/gym-treadmill.png"]
@@ -1011,6 +1051,8 @@ function renderDetail(animateRing) {
   screen.classList.toggle("detail-colored", vm.isCompleted);
   // Everyone else's proof stays behind frosted glass until the user has posted their own.
   screen.classList.toggle("detail-unverified", vm.requiresPhoto && !vm.isCompleted);
+  // Discover Join preview — HabitDetailView.isJoinLocked
+  screen.classList.toggle("detail-join-locked", vm.isJoinLocked);
 
   $("#detailCircle").textContent = vm.circleName;
   $("#detailName").textContent = vm.title;
@@ -1026,7 +1068,10 @@ function renderDetail(animateRing) {
 
   $("#detailFreqPill").style.display = vm.requiresPhoto ? "" : "none";
   $("#photoHistory").classList.toggle("hidden", !vm.requiresPhoto);
-  $(".chat-btn", screen).disabled = !vm.hasChat;
+  const chatBtn = $(".chat-btn", screen);
+  // Locked Discover preview hides chat entirely; otherwise disable when there's no thread.
+  chatBtn.hidden = vm.isJoinLocked;
+  chatBtn.disabled = !vm.hasChat;
 
   // Each shot gets its own clipping box so the locked blur below stays inside its corners
   // instead of dissolving them.
@@ -1048,12 +1093,21 @@ function updateCta() {
   btn.disabled = vm.isCompleted;
 }
 
-function openDetail(task, offset) {
-  vm = makeViewModel(task, offset);
+function openDetail(task, offset, opts = {}) {
+  vm = makeViewModel(task, offset, opts);
   ringFraction = 0; // entrance always sweeps from empty
   renderDetail(true);
   renderChat();
   showScreen("detail");
+}
+
+/// HabitDetailViewModel.join — clear the Discover gate with a short ease-out.
+function joinCircle() {
+  if (!vm || !vm.isJoinLocked) return;
+  vm.isJoinLocked = false;
+  vm.hasChat = vm.requiresPhoto;
+  renderDetail(false);
+  renderChat();
 }
 
 /// HabitDetailViewModel.finishCompletion — updates ring, pills, badge and home list.
@@ -1671,8 +1725,14 @@ function init() {
   $$(".tab").forEach((t) => t.addEventListener("click", () => showScreen(t.dataset.tab)));
   $$("[data-nav]").forEach((b) => b.addEventListener("click", () => showScreen(b.dataset.nav)));
 
+  // Detail back dismisses to Discover when opened from Join, else Home.
+  $("#detailBack").addEventListener("click", () => {
+    showScreen(vm && vm.openedFrom === "discover" ? "discover" : "home");
+  });
+  $("#joinViewBtn").addEventListener("click", joinCircle);
+
   $("#ctaBtn").addEventListener("click", () => {
-    if (vm.isCompleted) return;
+    if (vm.isCompleted || vm.isJoinLocked) return;
     if (vm.requiresPhoto) {
       startPhotoVerification();
     } else {
