@@ -588,7 +588,6 @@ input, textarea {
 .saved-empty-sub {
   font-size: 14px; line-height: 20px; max-width: 260px;
 }
-.header-icon.has-saved { color: var(--pink); }
 
 /* ==========================================================================
    HABIT DETAIL — HabitDetailView.swift

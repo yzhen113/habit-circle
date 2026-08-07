@@ -698,20 +698,10 @@ function likedCircles() {
   return CIRCLES.filter((c) => c.liked);
 }
 
-/// Home heart fill — pink when at least one Discover circle is saved.
-function updateHomeHeart() {
-  const btn = $("#homeHeart");
-  if (!btn) return;
-  const any = likedCircles().length > 0;
-  btn.classList.toggle("has-saved", any);
-  btn.innerHTML = any ? ICONS["heart-fill"] : ICONS.heart;
-}
-
 function toggleCircleLike(c) {
   c.liked = !c.liked;
   renderCircleList();
   renderSavedList();
-  updateHomeHeart();
 }
 
 function appendCircleCard(list, c, opts = {}) {
@@ -807,7 +797,6 @@ function renderDiscover() {
   renderChips();
   renderCircleList();
   renderSavedList();
-  updateHomeHeart();
   $("#discoverSearch").addEventListener("input", (e) => {
     discoverSearch = e.target.value;
     renderCircleList();
