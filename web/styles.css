@@ -525,8 +525,8 @@ input, textarea {
 .circle-card .c-meta { display: flex; align-items: center; gap: 6px; color: var(--dark-gray); }
 .circle-card .c-duration { font-size: 14px; font-weight: 400; }
 .circle-card .c-dot { font-size: 11px; }
-.circle-card .c-people { font-size: 11px; line-height: 0; display: inline-flex; }
-.circle-card .c-count { font-size: 11px; font-weight: 400; }
+.circle-card .c-people { font-size: 14px; line-height: 0; display: inline-flex; }
+.circle-card .c-count { font-size: 14px; font-weight: 400; }
 .circle-card .c-desc { font-size: 14px; font-weight: 400; color: var(--dark-gray); line-height: 19px; }
 .cc-footer { display: flex; align-items: center; }
 .circle-card .c-like {
