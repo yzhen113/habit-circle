@@ -1794,9 +1794,6 @@ function init() {
   });
   $("#joinViewBtn").addEventListener("click", joinCircle);
 
-  $("#homeHeart").addEventListener("click", () => showScreen("saved"));
-  $("#savedBack").addEventListener("click", () => showScreen("home"));
-
   $("#ctaBtn").addEventListener("click", () => {
     if (vm.isCompleted || vm.isJoinLocked) return;
     if (vm.requiresPhoto) {

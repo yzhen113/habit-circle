@@ -209,9 +209,13 @@ input, textarea {
 }
 .header-icon {
   border: none; background: transparent; cursor: pointer; padding: 0;
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
   font-size: 26px;                 /* AppLayout.heartIconSize */
   color: var(--date-unselected);   /* AppColors.dateUnselected */
   line-height: 0;
+  flex: 0 0 auto;
+  margin-right: -9px; /* keep visual icon on the 28px inset despite larger hit box */
 }
 
 /* Rolling date header — 36 Semibold, .contentTransition(.numericText()).
@@ -551,15 +555,21 @@ input, textarea {
 }
 .saved-header {
   position: relative;
-  display: flex; align-items: center; justify-content: center;
-  padding: 12px var(--tabbar-h-pad);
+  display: flex; align-items: center; justify-content: flex-start; gap: 4px;
+  padding: 8px var(--tabbar-h-pad) 16px;
   min-height: 50px;
   flex: 0 0 auto;
 }
 .saved-title {
-  font-size: 16px; font-weight: 500; color: var(--black);
+  margin: 0;
+  font-size: 36px; font-weight: 600; line-height: 41px;
+  color: var(--black);
 }
-.saved-header .icon-btn.back { left: var(--tabbar-h-pad); }
+.saved-header .icon-btn.back {
+  position: static; transform: none;
+  font-size: 20px; flex: 0 0 auto;
+  margin-left: -6px;
+}
 .saved-scroll {
   flex: 1; min-height: 0; overflow-y: auto;
 }

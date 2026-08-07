@@ -6,7 +6,7 @@
   <title>Habit Circle — Interactive Prototype</title>
   <meta name="description" content="Habit Circle: build habits together in small accountability circles." />
   <link rel="icon" href="assets/AppIcon.png?v=2" type="image/png" />
-  <link rel="stylesheet" href="styles.css?v=65" />
+  <link rel="stylesheet" href="styles.css?v=66" />
 </head>
 <body>
   <div class="stage">
@@ -30,7 +30,7 @@
           <section class="screen" data-screen="home">
             <header class="home-header">
               <h2 id="homeTitle" class="rolling-date" aria-label="Feb 12"></h2>
-              <button class="header-icon" id="homeHeart" data-icon="heart" aria-label="Saved"></button>
+              <button class="header-icon" id="homeHeart" data-nav="saved" data-icon="heart" aria-label="Saved"></button>
             </header>
             <div class="weekstrip" id="weekStrip">
               <div class="weekstrip-track" id="weekStripTrack"></div>
@@ -43,8 +43,8 @@
           <!-- SAVED — hearted Discover circles -->
           <section class="screen" data-screen="saved">
             <header class="saved-header">
-              <button class="icon-btn back" id="savedBack" data-icon="chevron-left" aria-label="Back"></button>
-              <span class="saved-title">Saved</span>
+              <button class="icon-btn back" id="savedBack" data-nav="home" data-icon="chevron-left" aria-label="Back"></button>
+              <h2 class="saved-title">Saved</h2>
             </header>
             <div class="saved-scroll" id="savedScroll">
               <div class="circle-list" id="savedList"></div>
@@ -382,6 +382,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=65"></script>
+  <script src="app.js?v=66"></script>
 </body>
 </html>
