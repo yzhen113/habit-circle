@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Habit Circle — Interactive Prototype</title>
+  <meta name="description" content="Habit Circle: build habits together in small accountability circles." />
+  <link rel="icon" href="assets/AppIcon.png" />
+  <link rel="stylesheet" href="styles.css?v=53" />
+</head>
+<body>
+  <div class="stage">
+    <div class="device-fit">
+    <div class="device" id="device">
+      <div class="screen-area">
+        <!-- iOS status bar — Figma component "Status bar - iPhone" (2:5) -->
+        <div class="statusbar">
+          <div class="sb-time">9:41</div>
+          <div class="sb-levels" aria-hidden="true">
+            <img class="sb-cellular" src="assets/sb-cellular.svg" alt="" />
+            <img class="sb-wifi" src="assets/sb-wifi.svg" alt="" />
+            <img class="sb-battery" src="assets/sb-battery.svg" alt="" />
+          </div>
+        </div>
+        <div class="dynamic-island" aria-hidden="true"></div>
+
+        <!-- App screens -->
+        <div class="app" id="app">
+          <!-- HOME -->
+          <section class="screen" data-screen="home">
+            <header class="home-header">
+              <h2 id="homeTitle" class="rolling-date" aria-label="Feb 12"></h2>
+              <button class="header-icon" data-icon="heart" aria-label="Saved"></button>
+            </header>
+            <div class="weekstrip" id="weekStrip">
+              <div class="weekstrip-track" id="weekStripTrack"></div>
+            </div>
+            <div class="day-pager" id="dayPager">
+              <div class="day-track" id="dayTrack"></div>
+            </div>
+          </section>
+
+          <!-- DISCOVER -->
+          <section class="screen" data-screen="discover">
+            <header class="discover-header">
+              <h2 class="discover-title">Discover</h2>
+              <div class="search">
+                <span class="search-ico" data-icon="search"></span>
+                <input id="discoverSearch" placeholder="Search..." />
+              </div>
+              <div class="chips-scroll"><div class="chips" id="chipRow"></div></div>
+            </header>
+            <div class="circle-list" id="circleList"></div>
+          </section>
+
+          <!-- DETAIL -->
+          <section class="screen" data-screen="detail">
+            <header class="detail-header">
+              <button class="icon-btn back" data-nav="home" data-icon="chevron-left" aria-label="Back"></button>
+              <span class="detail-title" id="detailCircle">Stairmasterers</span>
+              <button class="icon-btn chat-btn" data-nav="chat" data-icon="bubble-left" aria-label="Chat"></button>
+            </header>
+            <div class="detail-scroll">
+              <div class="habit-info">
+                <img class="habit-icon" id="detailIcon" src="assets/circle-fitness.png" alt="" />
+                <div class="habit-meta">
+                  <div class="habit-name-row">
+                    <span class="habit-name" id="detailName">30-min Cardio</span>
+                    <span class="members-ico" data-icon="person2"></span>
+                    <span class="members-count" id="detailMembers">10</span>
+                  </div>
+                  <div class="pill-row">
+                    <span class="meta-pill" id="detailDuration">1 month</span>
+                    <span class="meta-pill photo-pill" id="detailFreqPill"><span class="pill-cam" data-icon="camera"></span><span id="detailFreq">1/day</span></span>
+                  </div>
+                </div>
+                <div class="day-badge" id="dayBadge">
+                  <span class="db-label">Day</span>
+                  <span class="db-num" id="detailDay">9</span>
+                </div>
+              </div>
+
+              <div class="weekday-section">
+                <div class="wd-arrow" id="wdArrow" data-icon="triangle-marker"></div>
+                <div class="weekday-detail" id="weekdayDetail"></div>
+              </div>
+
+              <div class="ring-wrap">
+                <svg class="ring" viewBox="0 0 280 281" aria-hidden="true">
+                  <circle class="ring-track" cx="140" cy="140" r="126.957" />
+                </svg>
+                <!-- Full circle starting at 12 o'clock and running clockwise, revealed with
+                     stroke-dasharray. It sits on its own layer so a conic mask can dissolve
+                     the tail by angle travelled, which keeps the leading tip at full colour
+                     however far round the arc has gone. -->
+                <svg class="ring" id="ringArcLayer" viewBox="0 0 280 281" aria-hidden="true">
+                  <path class="ring-arc" id="ringArc"
+                    d="M140 13.043A126.957 126.957 0 1 1 140 266.957A126.957 126.957 0 1 1 140 13.043" />
+                </svg>
+                <!-- The rounded tip and its gloss live outside the mask so they stay at full
+                     strength, and are swung to the arc's leading edge by rotating about the
+                     ring's centre — which keeps them pinned to it through the sweep. -->
+                <svg class="ring" viewBox="0 0 280 281" aria-hidden="true">
+                  <g id="ringTipRot" class="ring-rot">
+                    <circle class="ring-tip" cx="140" cy="13.043" r="13.043" />
+                  </g>
+                  <g id="ringHiRot" class="ring-rot">
+                    <rect class="ring-hi" x="132.5" y="5" width="15" height="5" rx="2.5" />
+                  </g>
+                </svg>
+                <div class="ring-center">
+                  <div class="ring-count" id="ringCount">7/10</div>
+                  <p class="ring-caption"><em id="ringCircleName">Stairmasterers</em> have completed the habit today</p>
+                </div>
+              </div>
+
+              <div class="photo-history" id="photoHistory">
+                <div class="ph-head"><span>Photo Verification History</span><span class="chev" data-icon="chevron-right"></span></div>
+                <div class="ph-scroll" id="phScroll"></div>
+              </div>
+            </div>
+            <div class="detail-cta">
+              <button class="cta-btn" id="ctaBtn"><span class="cta-ico" data-icon="camera"></span><span class="cta-label">Verify with Photo</span></button>
+            </div>
+          </section>
+
+          <!-- CHAT -->
+          <section class="screen" data-screen="chat">
+            <div class="chat-msgs" id="chatScroll"></div>
+            <div class="chat-lock" id="chatLock">
+              <span class="chat-lock-label">Post to view</span>
+              <button class="lock-verify-btn" id="lockVerifyBtn">
+                <span class="lock-verify-ico" data-icon="camera"></span>
+                <span>Photo Verification</span>
+              </button>
+            </div>
+
+            <header class="chat-header">
+              <div class="chat-header-veil" aria-hidden="true"></div>
+              <div class="chat-header-row">
+                <button class="icon-btn back" data-nav="detail" data-icon="chevron-left" aria-label="Back"></button>
+                <img class="chat-habit-icon" id="chatIcon" src="assets/circle-fitness.png" alt="" />
+                <div class="habit-meta">
+                  <div class="habit-name-row">
+                    <span class="habit-name" id="chatTitle">30-min Cardio</span>
+                    <span class="members-ico" data-icon="person2"></span>
+                    <span class="members-count" id="chatMembers">10</span>
+                  </div>
+                  <div class="pill-row chat-pill-row">
+                    <span class="meta-pill" id="chatDuration">1 month</span>
+                    <span class="meta-pill photo-pill" id="chatFreqPill"><span class="pill-cam sm" data-icon="camera"></span><span id="chatFreq">1/day</span></span>
+                  </div>
+                </div>
+                <div class="day-badge" id="chatDayBadge">
+                  <span class="db-label">Day</span>
+                  <span class="db-num" id="chatDay">9</span>
+                </div>
+              </div>
+            </header>
+
+            <div class="composer">
+              <div class="attach-menu" id="attachMenu">
+                <button class="attach-row" data-attach="camera"><span class="attach-ico" data-icon="camera"></span><span>Camera</span></button>
+                <div class="attach-div"></div>
+                <button class="attach-row" data-attach="photos"><span class="attach-ico" data-icon="photo-stack"></span><span>Photos</span></button>
+              </div>
+              <button class="composer-add" id="composerAdd" data-icon="plus" aria-label="Attach"></button>
+              <div class="composer-field" id="composerField">
+                <div class="composer-row">
+                  <input id="chatInput" placeholder="Text the circle" />
+                  <button class="composer-send" id="chatSend" data-icon="arrow-up" aria-label="Send"></button>
+                  <span class="composer-mic" id="chatMic" data-icon="mic"></span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CREATE HABIT CIRCLE — Figma "name and desc" / "category" / "rules" / "visibility" -->
+          <section class="screen sheet-screen" data-screen="create">
+            <header class="create-header">
+              <div class="create-header-row">
+                <button class="icon-btn create-back" id="createBack" aria-label="Back"></button>
+                <span class="create-title">Create Habit Circle</span>
+              </div>
+              <div class="create-progress"><span class="cp-fill" id="createProgress"></span></div>
+            </header>
+
+            <div class="create-body" id="createBody">
+              <!-- Step 1 — name and description -->
+              <div class="create-step" data-step="1">
+                <h2 class="create-h1">Name your Habit Circle</h2>
+                <div class="create-fields">
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Group Name</span><span class="cf-req">Required</span></div>
+                    <div class="cinput"><input id="cGroupName" maxlength="40" placeholder="Name your circle" /></div>
+                  </div>
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Goal Name</span><span class="cf-req">Required</span></div>
+                    <div class="cinput"><input id="cGoalName" maxlength="40" placeholder="Name the habit" /></div>
+                  </div>
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Description</span><span class="cf-req">Optional</span></div>
+                    <div class="cinput tall"><textarea id="cDesc" maxlength="240" placeholder="Write a description for your Habit Circle..."></textarea></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 2 — category -->
+              <div class="create-step" data-step="2">
+                <h2 class="create-h1">Category of Habit</h2>
+                <div class="cat-grid" id="catGrid"></div>
+              </div>
+
+              <!-- Step 3 — rules -->
+              <div class="create-step" data-step="3">
+                <h2 class="create-h1">Set the Habit Rules</h2>
+                <div class="create-fields rules">
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Duration</span><span class="cf-req">Required</span></div>
+                    <div class="chip-wrap" id="durationChips"></div>
+                  </div>
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Reminder Frequency</span><span class="cf-req">Required</span></div>
+                    <div class="chip-wrap freq">
+                      <button class="cchip time" id="reminderTime">10:00 AM</button>
+                      <button class="cchip time" id="reminderEvery">Every Day</button>
+                    </div>
+                  </div>
+                  <div class="ctoggle-row">
+                    <span class="ctoggle-label">Photo Verification Mode</span>
+                    <button class="ctoggle" id="photoToggle" role="switch" aria-checked="false"><span class="ctoggle-knob"></span></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 4 — join settings -->
+              <div class="create-step" data-step="4">
+                <h2 class="create-h1">Join Settings</h2>
+                <div class="create-fields">
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Visibility</span><span class="cf-req">Required</span></div>
+                    <button class="cselect" id="visibilitySelect">
+                      <span class="cselect-ico" id="visibilityIcon"></span>
+                      <span class="cselect-text">
+                        <span id="visibilityLabel">Restricted</span>
+                        <span class="cselect-sub" id="visibilityHint"></span>
+                      </span>
+                      <span class="cselect-caret" data-icon="caret-down"></span>
+                    </button>
+                  </div>
+                  <div class="cfield">
+                    <div class="cfield-label"><span>Add Member</span><span class="cf-req">Optional</span></div>
+                    <div class="member-row" id="memberRow"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 5 — success -->
+              <div class="create-step" data-step="5">
+                <div class="create-done">
+                  <div class="cdone-badge" id="cdoneBadge"><img id="cdoneIcon" src="assets/circle-eating.png" alt="" /></div>
+                  <div class="cdone-text">
+                    <h2>You’ve completed creating your Habit Circle!</h2>
+                    <p>You will be able to view your Habit Circle on your Home Page.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="create-cta" id="createCta">
+              <button class="cbtn primary" id="createNext">Next</button>
+              <button class="cbtn subtle" id="createShare">Share Link</button>
+            </div>
+
+            <!-- Reminder sheets -->
+            <div class="csheet-scrim" id="csheetScrim"></div>
+
+            <div class="csheet" id="timeSheet">
+              <div class="csheet-head">
+                <button class="csheet-cancel" data-sheet-close>Cancel</button>
+                <span class="csheet-title">Reminder Time</span>
+                <button class="csheet-done" id="timeDone">Done</button>
+              </div>
+              <div class="wheel-picker" id="timeWheel">
+                <div class="wheel-band" aria-hidden="true"></div>
+                <div class="wheel-col" id="wheelHour" data-unit="hour"></div>
+                <div class="wheel-col" id="wheelMin" data-unit="min"></div>
+                <div class="wheel-col narrow" id="wheelPeriod" data-unit="period"></div>
+              </div>
+            </div>
+
+            <div class="csheet" id="freqSheet">
+              <div class="csheet-head">
+                <button class="csheet-cancel" data-sheet-close>Cancel</button>
+                <span class="csheet-title">Repeats</span>
+                <button class="csheet-done" id="freqDone">Done</button>
+              </div>
+              <div class="opt-list" id="freqOptions"></div>
+              <div class="custom-row" id="customRow">
+                <span>Every</span>
+                <div class="cinput inline"><input id="customEvery" type="number" min="1" max="30" value="2" /></div>
+                <span id="customUnit">days</span>
+              </div>
+            </div>
+
+            <div class="csheet" id="visSheet">
+              <div class="csheet-head">
+                <button class="csheet-cancel" data-sheet-close>Cancel</button>
+                <span class="csheet-title">Visibility</span>
+                <button class="csheet-done" id="visDone">Done</button>
+              </div>
+              <div class="opt-list" id="visOptions"></div>
+            </div>
+          </section>
+
+          <!-- CAMERA — Figma 1330:7493 (idle) / 1330:7617 (shutter pressed). Presented over
+               the detail page: the page dims behind and the sheet rises from y=63. -->
+          <section class="screen cam-screen" data-screen="camera">
+            <div class="cam-scrim" aria-hidden="true"></div>
+            <div class="cam-sheet">
+              <div class="cam-grabber" aria-hidden="true"></div>
+              <div class="cam-nav">
+                <button class="icon-btn cam-back" id="camBack" data-icon="chevron-left" aria-label="Back"></button>
+                <span class="cam-title">Photo verification</span>
+              </div>
+              <div class="cam-view">
+                <div class="cam-feed" aria-hidden="true"></div>
+                <img class="cam-shot" id="camShot" src="assets/gym-stairmaster.png" alt="" />
+                <img class="cam-frame" src="assets/camera-frame.svg" alt="" aria-hidden="true" />
+              </div>
+              <button class="cam-shutter" id="camShutter" aria-label="Take photo"></button>
+              <button class="cam-library" id="camLibrary">or choose from your library</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Floating tab bar (home/discover only) -->
+        <div class="tabbar" id="tabbar">
+          <div class="tab-pill" id="tabPill">
+            <div class="tab-pill-bg" aria-hidden="true"></div>
+            <div class="tab-selection" id="tabSelection" aria-hidden="true"></div>
+            <button class="tab active" data-tab="home"><span class="tab-ico" data-icon="house-fill"></span><span class="tab-label">Home</span></button>
+            <button class="tab" data-tab="discover"><span class="tab-ico" data-icon="person2"></span><span class="tab-label">Discover</span></button>
+          </div>
+          <button class="fab" aria-label="New circle"><span class="fab-bg" aria-hidden="true"></span><span class="fab-ico" data-icon="plus"></span></button>
+        </div>
+
+        <div class="home-indicator"></div>
+
+        <!-- Pointer-following glass orb, ported from the final presentation prototype
+             (final-presentation/src/components/GlassCursor.tsx). -->
+        <svg class="cursor-defs" focusable="false" aria-hidden="true">
+          <filter id="cursorGlass">
+            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.028" numOctaves="2" seed="13" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="32" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </svg>
+        <div class="glass-cursor" id="glassCursor" aria-hidden="true"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=53"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>shot</title>
+  <style>
+    html, body { margin: 0; background: #fff; }
+    iframe { width: 402px; height: 874px; border: 0; display: block; }
+  </style>
+</head>
+<body>
+<iframe id="f" src="index.html"></iframe>
+<script>
+  const target = new URLSearchParams(location.search).get("screen") || "home";
+  const f = document.getElementById("f");
+
+  f.addEventListener("load", () => {
+    const d = f.contentDocument;
+    const s = d.createElement("style");
+    s.textContent = `
+      .stage { padding: 0 !important; gap: 0 !important; min-height: 0 !important; display: block !important; }
+      .tagline, .hint { display: none !important; }
+      .device-fit { --scale: 1 !important; }
+      /* Square corners + no shadow so it matches a raw simctl screenshot. */
+      .device { filter: none !important; }
+      .screen-area { border-radius: 0 !important; clip-path: none !important; }
+    `;
+    d.head.appendChild(s);
+
+    const click = (sel) => { const n = d.querySelector(sel); if (n) n.click(); };
+
+    setTimeout(() => {
+      if (target === "discover") click('[data-tab="discover"]');
+      if (target === "detail" || target === "chat") {
+        const cards = d.querySelectorAll('#dayTrack .day-slot')[1].querySelectorAll('.task-card');
+        if (cards[2]) cards[2].click();
+        if (target === "chat") setTimeout(() => click('.detail-header [data-nav="chat"]'), 250);
+      }
+      if (target === "empty") {
+        // Saturday (offset +2) has no tasks -> EmptyTasksView
+        const w = f.contentWindow;
+        if (w.selectDay) w.selectDay(2);
+      }
+      document.title = "ready";
+    }, 400);
+  });
+</script>
+</body>
+</html>

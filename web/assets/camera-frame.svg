@@ -1,0 +1,13 @@
+<!-- Viewfinder brackets for the photo verification camera (Figma 1330:7610 "Scanning").
+     Figma draws that node as one rounded rect with stroke-dasharray "244 1300", but it
+     breaks the dash pattern per side, which no browser does — exported as-is it collapses
+     into a single mark near the top-left. These are the four brackets Figma actually
+     renders, with arm lengths sampled off its own PNG export of the frame. -->
+<svg width="354" height="515.62" viewBox="0 0 354 515.62" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#757575" stroke-width="4">
+    <path d="M40.5 2H15A13 13 0 0 0 2 15v38.5" />
+    <path d="M313.5 2H339a13 13 0 0 1 13 13v38.5" />
+    <path d="M352 462v38.62a13 13 0 0 1-13 13h-25.5" />
+    <path d="M2 462v38.62a13 13 0 0 0 13 13h25.5" />
+  </g>
+</svg>
